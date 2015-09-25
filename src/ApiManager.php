@@ -9,9 +9,6 @@
 
 namespace ChurchStreet\LabCoat;
 
-use ChurchStreet\Model\Issue,
-    ChurchStreet\Model\Resource;
-
 use GuzzleHttp\Client;
 
 /**
@@ -41,7 +38,7 @@ class ApiManager
      *
      * @var array
      */
-    private $pattern = '/<!--\DO NOT EDIT OR REMOVE THIS LINE({.*})-->/';
+    private $pattern = '/<!--DO NOT EDIT OR REMOVE THIS LINE\(({.*})\)-->/';
 
     /**
      * client
@@ -120,6 +117,52 @@ class ApiManager
     }
 
     /**
+     * Get Project
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param string $namespace
+     * @param string $name
+     *
+     * @return Project
+     */
+    public function getProject($namespace, $name)
+    {
+        $uri = sprintf('projects/%s%s%s',
+            $namespace,
+            '%2F',
+            $name
+        );
+        $response = $this->getClient()->get($uri);
+        $apiProject = json_decode($response->getBody()->getContents(), true);
+        $metaData = $this->getMetaData($apiProject);
+
+        return new Model\Project($apiProject, $metaData);
+    }
+
+    /**
+     * Get single Issue for a Project
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param Project $project
+     * @param int     $id
+     *
+     * @return array|Issue
+     */
+    public function getIssue(Model\Project $project, $id)
+    {
+        $uri = sprintf('projects/%s/issues/%s', $project->id, $id);
+
+        $response = $this->getClient()->get($uri);
+        $apiIssue = json_decode($response->getBody()->getContents(), true);
+
+        return new Model\Issue($apiIssue, $this->getMetaData($apiIssue));
+    }
+
+    /**
      * Get Issues for a Project
      *
      * By default, we get 100 open issues
@@ -177,5 +220,46 @@ class ApiManager
         }
 
         return $metaData;
+    }
+
+    /**
+     * Put metaData for Resource
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param Resource $resource
+     * @param array    $metaData
+     */
+    public function putMetaData(Model\Resource $resource, array $metaData)
+    {
+        $metaData = array_merge($resource->getMetaData(), $metaData);
+        $metaJson = sprintf('<!--DO NOT EDIT OR REMOVE THIS LINE(%s)-->',
+            json_encode($metaData)
+        );
+
+        $match = preg_match(
+            $this->pattern,
+            $resource->description,
+            $matches
+        );
+
+        if ($match) {
+            // remove existing metadata
+            $resource->description = trim(str_replace($matches[0], '', $resource->description));
+        }
+
+        // prepend new metaData
+        $description = sprintf("%s\n%s",
+            $metaJson,
+            $resource->description
+        );
+
+        $uri = sprintf('projects/%s/issues/%s', $resource->project_id, $resource->id);
+        $response = $this->getClient()->put($uri, [
+            'json' => [
+                'description' => $description,
+            ]
+        ]);
     }
 }

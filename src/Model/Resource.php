@@ -93,6 +93,19 @@ abstract class Resource
     }
 
     /**
+     * Get metaData
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0 (2015-09-24)
+     *
+     * @return array
+     */
+    public function getMetaData()
+    {
+        return $this->metaData;
+    }
+
+    /**
      * Get default metaData
      *
      * @author Tom Haskins-Vaughan <tom@tomhv.uk>
