@@ -10,15 +10,29 @@
 namespace ChurchStreet\LabCoat\Model;
 
 /**
- * Issue
+ * Project
  *
- * Represents a GitLab issue
+ * Represents a GitLab project
  *
  * @author Tom Haskins-Vaughan <tom@tomhv.uk>
  * @since  0.1.0
  */
-class Issue extends Resource
+class Project extends Resource
 {
+    /**
+     * issues
+     *
+     * @var array|Issue[]
+     */
+    public $issues = [];
+
+    /**
+     * openEstimatedHours
+     *
+     * @var float
+     */
+    public $openEstimatedHours = 0;
+
     /**
      * Get default metaData
      *
@@ -29,9 +43,6 @@ class Issue extends Resource
      */
     public function getDefaultMetaData()
     {
-        return [
-            'estimated' => 0,
-            'actual' => 0,
-        ];
+        return [];
     }
 }
