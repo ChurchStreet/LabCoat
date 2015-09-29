@@ -151,6 +151,26 @@ class ApiManager
     }
 
     /**
+     * Get Milestone
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param Project $project
+     * @param int     $milestone_iid
+     *
+     * @return Milestone
+     */
+    public function getMilestone(Model\Project $project, $milestone_iid)
+    {
+        $milestone = $this->client->getProjectMilestoneById($project->id, $milestone_iid);
+
+        $metaData = $this->getMetaData($milestone);
+
+        return new Model\Milestone($milestone, $metaData);
+    }
+
+    /**
      * Get single Issue for a Project
      *
      * @author Tom Haskins-Vaughan <tom@tomhv.uk>
@@ -191,6 +211,73 @@ class ApiManager
         ];
 
         $options = array_merge_recursive($defaultOptions, $options);
+        $response = $this->getClient()->get($uri, $options);
+        $apiIssues = json_decode($response->getBody()->getContents(), true);
+
+        $issues = [];
+
+        foreach ($apiIssues as $apiIssue) {
+            $issues[] = new Model\Issue($apiIssue, $this->getMetaData($apiIssue));
+        }
+
+        return $issues;
+    }
+
+    /**
+     * Get Milestones for a Project
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param Project $project
+     *
+     * @return array|Milestone[]
+     */
+    public function getMilestonesForProject(Model\Project $project, array $options = [])
+    {
+        $uri = sprintf('projects/%s/milestones', $project->id);
+        $defaultOptions = [
+            'query' => [
+                'per_page' => 100,
+            ],
+        ];
+
+        $options = array_merge_recursive($defaultOptions, $options);
+        $response = $this->getClient()->get($uri, $options);
+        $apiMilestones = json_decode($response->getBody()->getContents(), true);
+
+        $milestones = [];
+
+        foreach ($apiMilestones as $apiMilestone) {
+            if ('active' == $apiMilestone['state']) {
+                $milestones[] = new Model\Milestone($apiMilestone, $this->getMetaData($apiMilestone));
+            }
+        }
+
+        return $milestones;
+    }
+
+    /**
+     * Get Issues for a Milestone
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param Project $project
+     *
+     * @return array|Issue[]
+     */
+    public function getIssuesForMileStone(Model\Milestone $milestone, array $options = [])
+    {
+        $uri = sprintf('projects/%s/issues', $milestone->project_id);
+        $defaultOptions = [
+            'query' => [
+                'milestone' => $milestone->title,
+                'per_page' => 100,
+            ],
+        ];
+
+        $options = array_merge($defaultOptions, $options);
         $response = $this->getClient()->get($uri, $options);
         $apiIssues = json_decode($response->getBody()->getContents(), true);
 

@@ -97,12 +97,34 @@ class ApiClient
         $issues = json_decode($response->getBody()->getContents(), true);
 
         if (!count($issues)) {
-            throw new ResourceNotFoundException(sprintf(
+            throw new Exception\ResourceNotFoundException(sprintf(
                 'No Issue found for iid "%s"',
                 $issue_iid
             ));
         }
 
         return $issues[0];
+    }
+
+    /**
+     * Get single milestone by iid
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param int $project_id
+     * @param int $milestone_id
+     *
+     * @return array
+     */
+    public function getProjectMilestoneById($project_id, $milestone_id)
+    {
+        $uri = sprintf('projects/%s/milestones/%s', $project_id, $milestone_id);
+
+        dump($uri);
+
+        $response = $this->getHttpClient()->get($uri);
+
+        return json_decode($response->getBody()->getContents(), true);
     }
 }
