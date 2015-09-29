@@ -20,6 +20,29 @@ namespace ChurchStreet\LabCoat\Model;
 class Issue extends Resource
 {
     /**
+     * Priority
+     *
+     * @var string
+     */
+    const
+        PRIORITY_LOW = 'Low',
+        PRIORITY_MEDIUM = 'Medium',
+        PRIORITY_HIGH = 'High'
+    ;
+
+    /**
+     * Status
+     *
+     * @var string
+     */
+    const
+        STATUS_QUEUED = 'Queued',
+        STATUS_DEV = 'In development',
+        STATUS_UAT = 'UAT',
+        STATUS_READY_TO_SHIP = 'Ready to ship'
+    ;
+
+    /**
      * Get default metaData
      *
      * @author Tom Haskins-Vaughan <tom@tomhv.uk>
@@ -32,6 +55,8 @@ class Issue extends Resource
         return [
             'estimated' => 0,
             'actual' => 0,
+            'priority' => Issue::PRIORITY_MEDIUM,
+            'status' => Issue::STATUS_QUEUED,
         ];
     }
 }

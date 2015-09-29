@@ -43,9 +43,16 @@ class ApiManager
     /**
      * client
      *
-     * @var GuzzleHttp\Client
+     * @var ChurchStreet\LabCoat\ApiClient
      */
     private $client;
+
+    /**
+     * _client
+     *
+     * @var ChurchStreet\LabCoat\ApiClient
+     */
+    private $_client;
 
     /**
      * __construct()
@@ -53,13 +60,15 @@ class ApiManager
      * @author Tom Haskins-Vaughan <tom@tomhv.uk>
      * @since  0.1.0
      *
-     * @param string $apiToken
-     * @param string $baseUri
+     * @param string    $apiToken
+     * @param string    $baseUri
+     * @param ApiClient $client
      */
-    public function __construct($apiToken, $baseUri)
+    public function __construct($apiToken, $baseUri, $client)
     {
         $this->apiToken = $apiToken;
         $this->baseUri = $baseUri;
+        $this->client = $client;
     }
 
     /**
@@ -72,8 +81,8 @@ class ApiManager
      */
     public function getClient()
     {
-        if (!$this->client) {
-            $this->client = new Client([
+        if (!$this->_client) {
+            $this->_client = new Client([
                 'base_uri' => $this->baseUri,
                 'headers' => [
                     'PRIVATE-TOKEN' => $this->apiToken,
@@ -81,7 +90,7 @@ class ApiManager
             ]);
         }
 
-        return $this->client;
+        return $this->_client;
     }
 
     /**
@@ -148,18 +157,15 @@ class ApiManager
      * @since  0.1.0
      *
      * @param Project $project
-     * @param int     $id
+     * @param int     $issue_iid
      *
-     * @return array|Issue
+     * @return Issue
      */
-    public function getIssue(Model\Project $project, $id)
+    public function getIssue(Model\Project $project, $issue_iid)
     {
-        $uri = sprintf('projects/%s/issues/%s', $project->id, $id);
+        $issue = $this->client->getProjectIssueByIid($project->id, $issue_iid);
 
-        $response = $this->getClient()->get($uri);
-        $apiIssue = json_decode($response->getBody()->getContents(), true);
-
-        return new Model\Issue($apiIssue, $this->getMetaData($apiIssue));
+        return new Model\Issue($issue, $this->getMetaData($issue));
     }
 
     /**
