@@ -120,9 +120,6 @@ class ApiClient
     public function getProjectMilestoneById($project_id, $milestone_id)
     {
         $uri = sprintf('projects/%s/milestones/%s', $project_id, $milestone_id);
-
-        dump($uri);
-
         $response = $this->getHttpClient()->get($uri);
 
         return json_decode($response->getBody()->getContents(), true);
