@@ -224,6 +224,61 @@ class ApiManager
     }
 
     /**
+     * Get Issues that have no Milestone for a Project
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param Project $project
+     *
+     * @return array
+     */
+    public function getIssuesWithNoMilestone(Model\Project $project, array $options = [])
+    {
+        $uri = sprintf('projects/%s/issues', $project->id);
+        $defaultOptions = [
+            'query' => [
+                'state' => 'opened',
+                'per_page' => 100,
+            ],
+        ];
+
+        $issues = [
+            Model\Issue::PRIORITY_HIGH => [
+                'estimatedHours' => 0,
+                'count' => 0,
+                'issues' => [],
+            ],
+            Model\Issue::PRIORITY_MEDIUM => [
+                'estimatedHours' => 0,
+                'count' => 0,
+                'issues' => [],
+            ],
+            Model\Issue::PRIORITY_LOW => [
+                'estimatedHours' => 0,
+                'count' => 0,
+                'issues' => [],
+            ],
+        ];
+
+        $options = array_merge_recursive($defaultOptions, $options);
+        $response = $this->getClient()->get($uri, $options);
+        $apiIssues = json_decode($response->getBody()->getContents(), true);
+
+        foreach ($apiIssues as $apiIssue) {
+            if (!$apiIssue['milestone']) {
+                $issue = new Model\Issue($apiIssue, $this->getMetaData($apiIssue));
+
+                $issues[$issue->priority]['estimatedHours'] += $issue->estimated;
+                $issues[$issue->priority]['count']++;
+                $issues[$issue->priority]['issues'][] = $issue;
+            }
+        }
+
+        return $issues;
+    }
+
+    /**
      * Get Milestones for a Project
      *
      * @author Tom Haskins-Vaughan <tom@tomhv.uk>
