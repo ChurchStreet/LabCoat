@@ -249,6 +249,9 @@ class ApiManager
             $resource->description = trim(str_replace($matches[0], '', $resource->description));
         }
 
+        // compare existing to new metaData
+        $changes = $this->compareMetaData($resource->getMetaData(), $metaData);
+
         // prepend new metaData
         $description = sprintf("%s\n%s",
             $metaJson,
@@ -261,5 +264,50 @@ class ApiManager
                 'description' => $description,
             ]
         ]);
+
+        // log changes
+        $uri = sprintf('projects/%s/issues/%s/notes', $resource->project_id, $resource->id);
+        foreach ($changes as $property => $change) {
+            $response = $this->getClient()->post($uri, [
+                'json' => [
+                    'body' => sprintf(
+                        'Changed **%s** from **%s** to **%s** in LabCoat',
+                        ucfirst($property),
+                        $change['existing'],
+                        $change['new']
+                    ),
+                ]
+            ]);
+        }
+
+    }
+
+    /**
+     * Compare metaData
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param array $existing
+     * @param array $new
+     *
+     * @return array changes
+     */
+    public function compareMetaData(array $existing, array $new)
+    {
+        $changes = [];
+
+        foreach ($new as $key => $value) {
+            if (array_key_exists($key, $existing)) {
+                if ($new[$key] != $existing[$key]) {
+                    $changes[$key] = [
+                        'existing' => $existing[$key],
+                        'new' => $new[$key],
+                    ];
+                }
+            }
+        }
+
+        return $changes;
     }
 }
