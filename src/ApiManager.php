@@ -346,6 +346,27 @@ class ApiManager
     }
 
     /**
+     * Get Notes for an Issue
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param Issue $issue
+     *
+     * @return array|Note[]
+     */
+    public function getNotesForIssue(Model\Issue $issue)
+    {
+        $notes = [];
+
+        foreach ($this->client->getNotesForIssue($issue->project_id, $issue->id) as $note) {
+            $notes[] = new Model\Note($note, []);
+        }
+
+        return $notes;
+    }
+
+    /**
      * Parse apiData for metaData
      *
      * @author Tom Haskins-Vaughan <tom@tomhv.uk>

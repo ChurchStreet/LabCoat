@@ -124,4 +124,28 @@ class ApiClient
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * Get notesfor an issue
+     *
+     * @author Tom Haskins-Vaughan <tom@tomhv.uk>
+     * @since  0.1.0
+     *
+     * @param int $project_id
+     * @param int $issue_id
+     *
+     * @return array
+     */
+    public function getNotesForIssue($project_id, $issue_id)
+    {
+        $uri = sprintf(
+            'projects/%s/issues/%s/notes',
+            $project_id,
+            $issue_id
+        );
+
+        $response = $this->getHttpClient()->get($uri);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }
