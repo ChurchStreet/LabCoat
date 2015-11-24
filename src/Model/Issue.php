@@ -39,6 +39,7 @@ class Issue extends Resource
         STATUS_QUEUED = 'Queued',
         STATUS_DEV = 'In development',
         STATUS_UAT = 'UAT',
+        STATUS_FAILED_UAT = 'Failed UAT',
         STATUS_READY_TO_SHIP = 'Ready to ship'
     ;
 
