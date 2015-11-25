@@ -309,7 +309,7 @@ class ApiManager
             }
         }
 
-        return $milestones;
+        return array_reverse($milestones);
     }
 
     /**
