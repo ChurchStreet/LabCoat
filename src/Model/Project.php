@@ -27,6 +27,13 @@ class Project extends Resource
     public $issues = [];
 
     /**
+     * milestones
+     *
+     * @var array|Milestone[]
+     */
+    public $milestones = [];
+
+    /**
      * openEstimatedHours
      *
      * @var float
